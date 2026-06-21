@@ -10,8 +10,6 @@ import {
 } from "@/components/ui/card";
 
 export function Dashboard() {
-  const [count, setCount] = useState(0);
-
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -45,12 +43,19 @@ export function Dashboard() {
               Click the button to test React DevTools state inspection.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold mb-3">{count}</p>
-            <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
-          </CardContent>
+          <CardContentReactive />
         </Card>
       </div>
     </div>
   );
 }
+
+const CardContentReactive = () => {
+  const [count, setCount] = useState(0);
+  return (
+    <CardContent>
+      <p className="text-2xl font-bold mb-3">{count}</p>
+      <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
+    </CardContent>
+  );
+};
