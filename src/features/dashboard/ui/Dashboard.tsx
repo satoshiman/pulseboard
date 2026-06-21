@@ -1,5 +1,14 @@
 import { useAppContext } from "@/contexts/useAppContext";
 import { NotificationBadge } from "@/features/notifications/ui/NotificationBadge";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export function Dashboard() {
   const {
@@ -11,6 +20,7 @@ export function Dashboard() {
     paused,
     togglePause,
   } = useAppContext();
+  const [count, setCount] = useState(0);
 
   return (
     <div className="p-6">
@@ -69,6 +79,19 @@ export function Dashboard() {
             </p>
           ))}
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Interactive</CardTitle>
+            <CardDescription>
+              Click the button to test React DevTools state inspection.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold mb-3">{count}</p>
+            <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
