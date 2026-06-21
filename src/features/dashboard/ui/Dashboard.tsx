@@ -10,10 +10,27 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function Dashboard() {
-  // ✅ Không lấy dữ liệu từ context — mỗi widget tự subscribe
+function InteractiveCard() {
   const [count, setCount] = useState(0);
 
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Interactive</CardTitle>
+        <CardDescription>
+          Click the button to test React DevTools state inspection.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-bold mb-3">{count}</p>
+        <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function Dashboard() {
+  // ✅ Không lấy dữ liệu từ context — mỗi widget tự subscribe
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -48,18 +65,7 @@ export function Dashboard() {
           <p className="text-sm text-muted-foreground">— placeholder —</p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Interactive</CardTitle>
-            <CardDescription>
-              Click the button to test React DevTools state inspection.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold mb-3">{count}</p>
-            <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
-          </CardContent>
-        </Card>
+        <InteractiveCard />
       </div>
     </div>
   );

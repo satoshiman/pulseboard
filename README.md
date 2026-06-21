@@ -83,3 +83,68 @@ Mỗi hook subscribe **một phần nhỏ** của store → component chỉ re-r
 
 - `unreadCount` được **cache thủ công** thay vì dùng `notifications.filter(n => !n.read).length` để tránh tính toán O(n) mỗi lần render.
 - Guard trong `markAsRead` là pattern tốt — Zustand sẽ **skip re-render** khi trả về cùng reference `state`.
+
+---
+
+# Refactor — `InteractiveCard` tách khỏi `Dashboard`
+
+## Vấn đề
+
+`count` state ban đầu nằm thẳng trong `Dashboard`:
+
+```tsx
+export function Dashboard() {
+  const [count, setCount] = useState(0); // ❌ state ở parent
+
+  return (
+    // ... toàn bộ grid widget ...
+    <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
+  );
+}
+```
+
+Mỗi lần click button → `setCount` → `Dashboard` re-render → **tất cả widget con** (`NotificationBadge`, `NotificationFeed`, ...) bị re-render theo dù không liên quan.
+
+## Fix — State Colocation
+
+Tách phần counter thành component riêng `InteractiveCard`:
+
+```tsx
+function InteractiveCard() {
+  const [count, setCount] = useState(0); // ✅ state ở đúng nơi dùng nó
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Interactive</CardTitle>
+        <CardDescription>
+          Click the button to test React DevTools state inspection.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-bold mb-3">{count}</p>
+        <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function Dashboard() {
+  // Dashboard không còn giữ state → không re-render khi count thay đổi
+  return (
+    // ...
+    <InteractiveCard />
+  );
+}
+```
+
+## Kết quả
+
+|                                          | Trước                                      | Sau                             |
+| ---------------------------------------- | ------------------------------------------ | ------------------------------- |
+| Click button                             | Re-render toàn bộ `Dashboard` + mọi widget | Chỉ re-render `InteractiveCard` |
+| `NotificationBadge` / `NotificationFeed` | Bị kéo re-render theo                      | Không bị ảnh hưởng              |
+
+## Nguyên tắc
+
+> **State colocation**: state nên đặt ở component **thấp nhất** có thể sử dụng nó. Nếu chỉ một component cần → không kéo lên parent.
