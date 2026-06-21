@@ -1,73 +1,85 @@
-# React + TypeScript + Vite
+# Notification Store — `src/store/notification.store.ts`
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Zustand store quản lý toàn bộ trạng thái notification của app.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## State (`NotificationState`)
 
-## React Compiler
+- **`notifications`** — mảng tất cả notification
+- **`unreadCount`** — đếm số notification chưa đọc (cache riêng, không tính lại từ mảng mỗi lần render)
+- **`filter`** — bộ lọc hiện tại: `'all'` hoặc `'unread'`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Actions
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### `addNotification(n)`
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Thêm notification mới vào store.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```ts
+addNotification: (n) =>
+  set((state) => ({
+    notifications: [n, ...state.notifications],
+    unreadCount: state.unreadCount + (n.read ? 0 : 1),
+  })),
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Prepend `n` lên đầu mảng (mới nhất ở trên cùng)
+- Tăng `unreadCount` **chỉ khi** `n.read === false`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### `markAsRead(id)`
+
+Đánh dấu một notification là đã đọc theo `id`.
+
+```ts
+markAsRead: (id) =>
+  set((state) => {
+    const target = state.notifications.find((n) => n.id === id);
+    if (!target || target.read) return state;
+    return {
+      notifications: state.notifications.map((n) =>
+        n.id === id ? { ...n, read: true } : n,
+      ),
+      unreadCount: Math.max(0, state.unreadCount - 1),
+    };
+  }),
 ```
+
+- **Guard**: nếu không tìm thấy hoặc đã đọc rồi → trả về `state` cũ (tránh re-render thừa)
+- Set `read: true` cho đúng item theo `id`
+- Giảm `unreadCount` đi 1, dùng `Math.max(0, ...)` để tránh số âm
+
+---
+
+### `setFilter(f)`
+
+Đổi bộ lọc hiển thị.
+
+```ts
+setFilter: (filter) => set({ filter }),
+```
+
+---
+
+## Selector hooks
+
+```ts
+export const useNotifications = () =>
+  useNotificationStore((s) => s.notifications);
+export const useUnreadCount = () => useNotificationStore((s) => s.unreadCount);
+export const useNotificationFilter = () =>
+  useNotificationStore((s) => s.filter);
+```
+
+Mỗi hook subscribe **một phần nhỏ** của store → component chỉ re-render khi đúng phần đó thay đổi (tối ưu hiệu năng).
+
+---
+
+## Điểm đáng chú ý
+
+- `unreadCount` được **cache thủ công** thay vì dùng `notifications.filter(n => !n.read).length` để tránh tính toán O(n) mỗi lần render.
+- Guard trong `markAsRead` là pattern tốt — Zustand sẽ **skip re-render** khi trả về cùng reference `state`.
