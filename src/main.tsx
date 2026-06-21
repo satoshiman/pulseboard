@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Profiler } from "react";
+import { AppProvider } from "@/contexts/AppContext";
 import { Dashboard } from "@/features/dashboard/ui/Dashboard";
 import "./index.css";
 
@@ -12,7 +13,9 @@ function onRender(id: string, phase: string, actualDuration: number) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Profiler id="App" onRender={onRender}>
-      <Dashboard />
+      <AppProvider>
+        <Dashboard />
+      </AppProvider>
     </Profiler>
   </StrictMode>,
 );
