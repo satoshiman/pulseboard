@@ -1,5 +1,9 @@
 // ❌ INTENTIONALLY BAD — Anti-pattern Giant Context for baseline measurement
-import { createContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import {
+  generateFakeFiles,
+  generateFakeNotification,
+} from "@/mocks/data/generators";
 import type {
   Notification,
   Message,
@@ -7,23 +11,7 @@ import type {
   AnalyticsDataPoint,
   ActivityEvent,
 } from "@/shared/types";
-import {
-  generateFakeFiles,
-  generateFakeNotification,
-} from "@/mocks/data/generators";
-
-interface AppContextValue {
-  notifications: Notification[];
-  messages: Message[];
-  files: FileItem[];
-  analytics: AnalyticsDataPoint[];
-  activities: ActivityEvent[];
-  unreadCount: number;
-  paused: boolean;
-  togglePause: () => void;
-}
-
-export const AppContext = createContext<AppContextValue | null>(null);
+import { AppContext } from "./AppContextDef";
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -56,5 +44,3 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
-
-export { useAppContext } from "./useAppContext";

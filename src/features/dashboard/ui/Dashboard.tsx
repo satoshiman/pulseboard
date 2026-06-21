@@ -1,4 +1,4 @@
-import { useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/contexts/useAppContext";
 import { NotificationBadge } from "@/features/notifications/ui/NotificationBadge";
 
 export function Dashboard() {
