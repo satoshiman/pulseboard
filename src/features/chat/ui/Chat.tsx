@@ -14,6 +14,7 @@ export function Chat() {
   const sendMessage = useChatStore((s) => s.sendMessage);
   const appendToken = useChatStore((s) => s.appendToken);
   const finalizeStreaming = useChatStore((s) => s.finalizeStreaming);
+  const startStreaming = useChatStore((s) => s.startStreaming);
 
   const handleSend = useCallback(() => {
     if (inputValue.trim()) {
@@ -22,6 +23,7 @@ export function Chat() {
 
       // Demo streaming: AI trả lời sau 1s
       setTimeout(() => {
+        startStreaming();
         const demoResponse =
           "Đây là tin nhắn streaming demo. Token sẽ xuất hiện từng phần một!";
         let index = 0;
@@ -38,7 +40,7 @@ export function Chat() {
         }, 100);
       }, 1000);
     }
-  }, [inputValue, sendMessage, appendToken, finalizeStreaming]);
+  }, [inputValue, sendMessage, appendToken, finalizeStreaming, startStreaming]);
 
   return (
     <div className="flex flex-col" style={{ height: "80vh" }}>

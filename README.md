@@ -105,7 +105,7 @@ export function Chat() {
 
 - `MessageList` là component riêng, không nhận props từ Chat state
 - `inputValue` state chỉ nằm trong Chat component
-- `useCallback` cho `handleSend` để stable reference
+- `useCallback` cho `handleSend` để stable reference (giữ function reference ổn định, tránh re-render component con nếu được truyền xuống)
 - Selector hooks (`useIsStreaming`, `useStreamingContent`) chỉ subscribe needed state
 
 #### 2. MessageList.tsx - Virtual Scrolling
@@ -366,6 +366,12 @@ export const useIsStreaming = () => useChatStore((s) => s.isStreaming);
 - `Chat` không subscribe `messages` → không re-render khi messages change
 - `MessageList` chỉ subscribe `messages` → re-render khi messages change
 
+### 7. Animation Performance
+
+- **Streaming cursor**: `animate-pulse` cho cursor trong StreamingMessage
+- Animation sử dụng CSS native → không gây re-render
+- Tailwind animation classes được optimized browser-side
+
 ## Best Practices Demonstrated
 
 1. **Profile before optimizing** - Anti-pattern demo shows the problem first
@@ -375,6 +381,7 @@ export const useIsStreaming = () => useChatStore((s) => s.isStreaming);
 5. **Separate concerns** - Isolate re-renders by component separation
 6. **Use selector hooks** - Subscribe only to needed state
 7. **Stable function references** - useCallback for handlers passed to children
+8. **Prefer CSS animations** - Use native CSS/Tailwind animations instead of JS-driven animations
 
 ## Running the App
 

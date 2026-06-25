@@ -8,6 +8,7 @@ interface ChatStore {
   isStreaming: boolean;
   appendToken: (token: string) => void;
   finalizeStreaming: () => void;
+  startStreaming: () => void;
   sendMessage: (content: string, sender: "User" | "AI") => void;
   reactToMessage: (id: string, emoji: string) => void;
 }
@@ -17,6 +18,9 @@ export const useChatStore = create<ChatStore>((set) => ({
   messages: generateMarkdownMessages(1000),
   streamingContent: "",
   isStreaming: false,
+
+  startStreaming: () =>
+    set(() => ({ streamingContent: "", isStreaming: true })),
 
   appendToken: (token) =>
     set((state) => ({ streamingContent: state.streamingContent + token })),
