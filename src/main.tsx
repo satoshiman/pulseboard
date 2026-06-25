@@ -1,8 +1,17 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Profiler } from "react";
+import { scan } from "react-scan";
 import { Dashboard } from "@/features/dashboard/ui/Dashboard";
 import "./index.css";
+
+// Initialize react-scan for performance monitoring
+scan({
+  enabled: true,
+  log: true,
+  showToolbar: true,
+  animationSpeed: "fast",
+});
 
 // Profiler callback để debug timeline
 function onRender(id: string, phase: string, actualDuration: number) {
