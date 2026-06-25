@@ -4,6 +4,7 @@ import { Profiler } from "react";
 import { scan } from "react-scan";
 import { Dashboard } from "@/features/dashboard/ui/Dashboard";
 import "./index.css";
+import "@/mocks/simulateFlood";
 
 // Initialize react-scan for performance monitoring
 scan({

@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { NotificationCenter } from "@/features/notifications/ui/NotificationCenter";
+import { NotificationWidget } from "@/features/notifications/ui/NotificationWidget";
 
 export function Dashboard() {
   return (
@@ -20,10 +22,7 @@ export function Dashboard() {
           <h3 className="font-semibold mb-2">AI Usage</h3>
           <p className="text-sm text-muted-foreground">— placeholder —</p>
         </div>
-        <div className="border rounded-lg p-4">
-          <h3 className="font-semibold mb-2">Notifications</h3>
-          <p className="text-sm text-muted-foreground">— placeholder —</p>
-        </div>
+        <NotificationCenter />
         <div className="border rounded-lg p-4">
           <h3 className="font-semibold mb-2">Recent Files</h3>
           <p className="text-sm text-muted-foreground">— placeholder —</p>
@@ -32,10 +31,7 @@ export function Dashboard() {
           <h3 className="font-semibold mb-2">Activity</h3>
           <p className="text-sm text-muted-foreground">— placeholder —</p>
         </div>
-        <div className="border rounded-lg p-4">
-          <h3 className="font-semibold mb-2">Recent Messages</h3>
-          <p className="text-sm text-muted-foreground">— placeholder —</p>
-        </div>
+        <NotificationWidget />
         <Card>
           <CardHeader>
             <CardTitle>Interactive</CardTitle>
