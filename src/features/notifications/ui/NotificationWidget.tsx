@@ -9,7 +9,7 @@ export const NotificationWidget = memo(function NotificationWidget() {
   renderCount.current += 1;
 
   console.log(
-    `🎨 NotificationWidget render #${renderCount.current}, notifications: ${notifications.length}`,
+    `🎨 NotificationWidget render #${renderCount.current}, notifications length: ${notifications.length}`,
   );
 
   if (import.meta.env.DEV) {
