@@ -158,3 +158,67 @@ useEffect(() => {
 **Problem:** Over-mocking leads to tests that don't verify real behavior.
 
 **Solution:** Mock only external dependencies, integrate with real implementations when possible.
+
+## Performance Monitoring with react-scan
+
+### Installation
+
+```bash
+npm install react-scan
+```
+
+### Setup
+
+Add react-scan to your `main.tsx`:
+
+```tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { scan } from "react-scan";
+import App from "./App";
+import "./index.css";
+
+// Enable react-scan in development only
+if (import.meta.env.DEV) {
+  scan({
+    enabled: true,
+    // Show toolbar for visual inspection
+    showToolbar: true,
+    // Log to console
+    log: true,
+  });
+}
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>,
+);
+```
+
+### What react-scan Detects
+
+- **Unnecessary re-renders**: Components rendering without prop/state changes
+- **Large render times**: Components taking too long to render
+- **Deep component trees**: Identifying overly nested component structures
+- **Memory leaks**: Components not cleaning up properly
+- **Expensive operations**: Slow computations in render cycles
+
+### Usage Tips
+
+1. **Development Only**: Always wrap react-scan initialization in `import.meta.env.DEV` check
+2. **Toolbar**: Use the built-in toolbar to visualize render patterns
+3. **Console Logs**: Check console for detailed performance metrics
+4. **Component Profiling**: Click on components in the toolbar to see detailed stats
+5. **Filtering**: Use filters to focus on specific components or features
+
+### Common Issues Detected
+
+- Components re-rendering when parent updates but props haven't changed
+- Missing `React.memo` on expensive components
+- Inline functions/objects causing child re-renders
+- Large state objects causing cascading re-renders
+- Context updates causing unnecessary subtree re-renders
