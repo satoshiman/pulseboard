@@ -1,18 +1,64 @@
-import { create } from 'zustand';
-import type { Notification } from '@/shared/types';
+import { create } from "zustand";
+import type { Notification } from "@/shared/types";
 
 interface NotificationStore {
   notifications: Notification[];
-  addNotification: (n: Notification) => void;
+  pendingQueue: Notification[];
+  enqueue: (n: Notification) => void;
+  flushQueue: () => void;
 }
 
-// ❌ Mỗi addNotification → setState → re-render ngay
-export const useNotificationStore = create<NotificationStore>((set) => ({
-  notifications: [],
-  addNotification: (n) =>
-    set(state => ({ notifications: [n, ...state.notifications] })),
-}));
+// ✅ Batching queue: gom notifications trong 100ms → 1 setState → 1 re-render
+export const useNotificationStore = create<NotificationStore>((set, get) => {
+  let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
-export const useNotifications = () => useNotificationStore(s => s.notifications);
+  return {
+    notifications: [],
+    pendingQueue: [],
+
+    // ✅ Thêm vào queue — KHÔNG update UI ngay
+    enqueue: (n) => {
+      console.log(
+        `➕ Enqueue called, queue size before: ${get().pendingQueue.length}`,
+      );
+      set((state) => {
+        const newQueue = [...state.pendingQueue, n];
+        console.log(`➕ Setting pendingQueue to size: ${newQueue.length}`);
+        return { pendingQueue: newQueue };
+      });
+
+      // ✅ Chỉ set timer nếu chưa có (không reset mỗi lần)
+      if (!flushTimer) {
+        flushTimer = setTimeout(() => {
+          get().flushQueue();
+          flushTimer = null;
+        }, 50); // ✅ Gom notifications trong 50ms
+      }
+    },
+
+    // ✅ Flush → 1 setState → 1 re-render (dù có 10+ notifications)
+    flushQueue: () => {
+      const currentState = get();
+      console.log(
+        `🔄 Flushing ${currentState.pendingQueue.length} notifications to store`,
+      );
+      set(() => ({
+        notifications: [
+          ...currentState.pendingQueue,
+          ...currentState.notifications,
+        ],
+        pendingQueue: [],
+      }));
+    },
+  };
+});
+
+export const useNotifications = () =>
+  useNotificationStore((s) => {
+    console.log(
+      `📡 Selector called, notifications count: ${s.notifications.length}`,
+    );
+    return s.notifications;
+  });
 export const useUnreadCount = () =>
-  useNotificationStore(s => s.notifications.filter(n => !n.read).length);
+  useNotificationStore((s) => s.notifications.filter((n) => !n.read).length);
