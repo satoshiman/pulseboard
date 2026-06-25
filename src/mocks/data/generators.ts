@@ -38,6 +38,5 @@ export function generateFakeMessage(chatId: string): Message {
     content: faker.lorem.sentences(faker.number.int({ min: 1, max: 4 })),
     timestamp: Date.now(),
     isStreaming: false,
-    reactions: {},
   };
 }
