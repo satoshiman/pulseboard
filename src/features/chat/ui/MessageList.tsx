@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useCallback } from "react";
+import { useRef, useLayoutEffect, useCallback, memo } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChatMessage } from "./ChatMessage";
 import {
@@ -7,7 +7,7 @@ import {
   useChatStore,
 } from "@/store/chat.store";
 
-export function MessageList() {
+export const MessageList = memo(function MessageList() {
   const messages = useMessages();
   const messagesCount = useMessagesCount();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,4 +61,4 @@ export function MessageList() {
       </div>
     </div>
   );
-}
+});

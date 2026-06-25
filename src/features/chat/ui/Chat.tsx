@@ -1,14 +1,14 @@
-import { useState, useCallback } from "react";
+import { useCallback, memo } from "react";
 import { MessageList } from "./MessageList";
 import { StreamingMessage } from "./StreamingMessage";
+import { ChatInput } from "./ChatInput";
 import {
   useIsStreaming,
   useStreamingContent,
   useChatStore,
 } from "@/store/chat.store";
 
-export function Chat() {
-  const [inputValue, setInputValue] = useState("");
+export const Chat = memo(function Chat() {
   const isStreaming = useIsStreaming();
   const streamingContent = useStreamingContent();
   const sendMessage = useChatStore((s) => s.sendMessage);
@@ -16,10 +16,9 @@ export function Chat() {
   const finalizeStreaming = useChatStore((s) => s.finalizeStreaming);
   const startStreaming = useChatStore((s) => s.startStreaming);
 
-  const handleSend = useCallback(() => {
-    if (inputValue.trim()) {
-      sendMessage(inputValue, "User");
-      setInputValue("");
+  const handleSend = useCallback(
+    (message: string) => {
+      sendMessage(message, "User");
 
       // Demo streaming: AI trả lời sau 1s
       setTimeout(() => {
@@ -39,8 +38,9 @@ export function Chat() {
           }
         }, 100);
       }, 1000);
-    }
-  }, [inputValue, sendMessage, appendToken, finalizeStreaming, startStreaming]);
+    },
+    [sendMessage, appendToken, finalizeStreaming, startStreaming],
+  );
 
   return (
     <div className="flex flex-col" style={{ height: "80vh" }}>
@@ -50,21 +50,8 @@ export function Chat() {
       {/* ✅ StreamingMessage tách biệt, re-render khi token mới */}
       {isStreaming && <StreamingMessage content={streamingContent} />}
 
-      <div className="border-t p-4 flex gap-2">
-        <input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Nhập tin nhắn... (Enter để gửi)"
-          className="flex-1 border rounded px-3 py-2 text-sm"
-        />
-        <button
-          onClick={handleSend}
-          className="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-        >
-          Gửi
-        </button>
-      </div>
+      {/* ✅ ChatInput tách biệt, local state không ảnh hưởng parent */}
+      <ChatInput onSend={handleSend} />
     </div>
   );
-}
+});
