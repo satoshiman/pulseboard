@@ -5,11 +5,13 @@ export const NotificationWidget = memo(function NotificationWidget() {
   const renderCount = useRef(0);
   renderCount.current += 1;
 
-  if (import.meta.env.DEV) {
-    console.log(`NotificationWidget renders: ${renderCount.current}`);
-  }
-
   const notifications = useNotifications();
+
+  if (import.meta.env.DEV) {
+    console.log(
+      `NotificationWidget renders: ${renderCount.current}, notifications: ${notifications.length}`,
+    );
+  }
 
   return (
     <div className="border rounded-lg p-4">
