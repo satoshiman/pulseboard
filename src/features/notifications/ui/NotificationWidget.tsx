@@ -1,7 +1,14 @@
-import { memo } from 'react';
-import { useNotifications } from '@/store/notification.store';
+import { memo, useRef } from "react";
+import { useNotifications } from "@/store/notification.store";
 
 export const NotificationWidget = memo(function NotificationWidget() {
+  const renderCount = useRef(0);
+  renderCount.current += 1;
+
+  if (import.meta.env.DEV) {
+    console.log(`NotificationWidget renders: ${renderCount.current}`);
+  }
+
   const notifications = useNotifications();
 
   return (
