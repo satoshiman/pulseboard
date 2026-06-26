@@ -8,7 +8,7 @@ interface NotificationStore {
   flushQueue: () => void;
 }
 
-// ✅ Batching queue: gom notifications trong 100ms → 1 setState → 1 re-render
+// ✅ Batching queue: gom notifications trong 300ms → 1 setState → 1 re-render
 export const useNotificationStore = create<NotificationStore>((set, get) => {
   let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -32,13 +32,16 @@ export const useNotificationStore = create<NotificationStore>((set, get) => {
         flushTimer = setTimeout(() => {
           get().flushQueue();
           flushTimer = null;
-        }, 50); // ✅ Gom notifications trong 50ms
+        }, 300); // ✅ Gom notifications trong 300ms
       }
     },
 
     // ✅ Flush → 1 setState → 1 re-render (dù có 10+ notifications)
     flushQueue: () => {
       const currentState = get();
+      if (currentState.pendingQueue.length === 0) {
+        return; // ✅ Không render nếu queue rỗng
+      }
       console.log(
         `🔄 Flushing ${currentState.pendingQueue.length} notifications to store`,
       );
