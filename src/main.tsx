@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Profiler } from "react";
 import { scan } from "react-scan";
-import { Dashboard } from "@/features/dashboard/ui/Dashboard";
+import { Router } from "./router";
 import "./index.css";
 
 // Initialize react-scan for performance monitoring
@@ -21,7 +21,7 @@ function onRender(id: string, phase: string, actualDuration: number) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Profiler id="App" onRender={onRender}>
-      <Dashboard />
+      <Router />
     </Profiler>
   </StrictMode>,
 );
