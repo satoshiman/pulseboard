@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Dashboard } from "@/features/dashboard/ui/Dashboard";
+import { AppProvider } from "@/shared/context/AppContext";
 import App from "./App";
 
 const router = createBrowserRouter([
@@ -9,7 +10,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <Dashboard />,
+    element: (
+      <AppProvider>
+        <Dashboard />
+      </AppProvider>
+    ),
   },
 ]);
 
