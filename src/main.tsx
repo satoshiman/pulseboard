@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Profiler } from "react";
 import { scan } from "react-scan";
-import { Dashboard } from "@/features/dashboard/ui/Dashboard";
+import App from "./App";
 import "./index.css";
 import "@/mocks/simulateFlood";
 
@@ -22,7 +22,7 @@ function onRender(id: string, phase: string, actualDuration: number) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Profiler id="App" onRender={onRender}>
-      <Dashboard />
+      <App />
     </Profiler>
   </StrictMode>,
 );
