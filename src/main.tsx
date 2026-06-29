@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { Profiler } from "react";
 import { scan } from "react-scan";
 import { Router } from "./router";
+import "./wdyr";
 import "./index.css";
 
 // Initialize react-scan for performance monitoring
