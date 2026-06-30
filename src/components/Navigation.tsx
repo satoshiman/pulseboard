@@ -12,6 +12,9 @@ export function Navigation() {
           <Link to="/dashboard" className="text-sm hover:underline">
             Dashboard
           </Link>
+          <Link to="/memleak" className="text-sm hover:underline">
+            Memory Leak
+          </Link>
         </div>
       </div>
     </nav>
