@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "build:profile": "REACT_PROFILING=true tsc -b && REACT_PROFILING=true vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "analyze": "vite build --mode development"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -26,6 +27,10 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.0",
     "recharts": "^3.8.1",
+    "rehype-highlight": "^7.0.2",
+    "rehype-raw": "^7.0.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "shadcn": "^4.11.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.1",
