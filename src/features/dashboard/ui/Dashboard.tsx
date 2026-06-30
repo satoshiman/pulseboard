@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,8 +9,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Navigation } from "@/components/Navigation";
-import { AnalyticsChart } from "@/features/analytics/ui/AnalyticsChart";
-import { MarkdownRenderer } from "@/features/markdown/ui/MarkdownRenderer";
+
+// Dynamic import for heavy components - load only when needed
+const AnalyticsChart = lazy(() =>
+  import("@/features/analytics/ui/AnalyticsChart").then((m) => ({
+    default: m.AnalyticsChart,
+  })),
+);
+
+const MarkdownRenderer = lazy(() =>
+  import("@/features/markdown/ui/MarkdownRenderer").then((m) => ({
+    default: m.MarkdownRenderer,
+  })),
+);
 
 // Mock data for chart
 const mockChartData = Array.from({ length: 24 }, (_, i) => ({
@@ -45,7 +56,11 @@ export function Dashboard() {
         <div className="grid grid-cols-3 gap-4">
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold mb-2">AI Usage</h3>
-            <AnalyticsChart data={mockChartData} />
+            <Suspense
+              fallback={<div className="h-48 bg-muted animate-pulse rounded" />}
+            >
+              <AnalyticsChart data={mockChartData} />
+            </Suspense>
           </div>
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold mb-2">Notifications</h3>
@@ -77,7 +92,13 @@ export function Dashboard() {
               <CardTitle>Usage Report</CardTitle>
             </CardHeader>
             <CardContent>
-              <MarkdownRenderer content={mockMarkdown} />
+              <Suspense
+                fallback={
+                  <div className="h-32 bg-muted animate-pulse rounded" />
+                }
+              >
+                <MarkdownRenderer content={mockMarkdown} />
+              </Suspense>
             </CardContent>
           </Card>
         </div>
