@@ -1,28 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardContent,
 } from "@/components/ui/card";
-import { useAppContext } from "@/shared/context/AppContext";
+import { Button } from "@/components/ui/button";
+
+import { useAppContext } from "@/shared/context/useAppContext";
+import { useNotifications, useUnreadCount } from "@/store/notification.store";
+import { useMessages } from "@/store/chat.store";
 
 // Fixed timestamp for anti-pattern demo (avoiding lint error)
 const NOW = Date.now();
 
-// ❌ Anti-pattern: Computed values TRONG render loop
-// Mỗi render đều chạy lại những phép tính này:
-// - filter notifications O(100k) = ~30ms
-// - groupByDate O(100k log 100k) = ~80ms
-// - filter + sort messages O(20k log 20k) = ~25ms
-// - Math.max analytics O(10k) = ~5ms
-// - reduce analytics O(10k) = ~5ms
-// Tổng: ~145ms mỗi render
+// Memoized Interactive Card to prevent re-renders from forceUpdate
+const InteractiveCard = memo(() => {
+  const [count, setCount] = useState(0);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Interactive</CardTitle>
+        <CardDescription>
+          Click the button to test React DevTools state inspection.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-2xl font-bold mb-3">{count}</p>
+        <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
+      </CardContent>
+    </Card>
+  );
+});
+
+// ✅ Fixed: Pre-computed values + useMemo
+// - unreadCount: O(1) from Zustand store
+// - recentMessages: O(n log n) but memoized
+// - analytics stats: O(n) but memoized
 export function Dashboard() {
-  const { notifications, messages, analytics } = useAppContext();
+  const { analytics } = useAppContext();
+  const notifications = useNotifications();
+  const unreadCount = useUnreadCount(); // ✅ Pre-computed, O(1)
+  const messages = useMessages();
   const [forceUpdate, setForceUpdate] = useState(0);
 
   // Simulate notification flood - trigger re-render every 100ms
@@ -33,18 +54,33 @@ export function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Mỗi render đều chạy lại những phép tính này:
-  const unreadNotifications = notifications.filter((n) => !n.read); // O(n)
-  const totalUnread = unreadNotifications.length; // O(n)
+  // ✅ Chỉ tính lại khi messages thay đổi — deps: primitive string/number
+  const recentMessages = useMemo(
+    () =>
+      messages
+        .filter((m) => NOW - m.timestamp < 86400000)
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 20),
+    [messages],
+  );
 
-  const recentMessages = messages
-    .filter((m) => NOW - m.timestamp < 86400000) // O(n)
-    .sort((a, b) => b.timestamp - a.timestamp) // O(n log n)
-    .slice(0, 20); // O(1)
+  // ✅ Batch nhiều analytics computations trong 1 useMemo
+  const analyticsStats = useMemo(() => {
+    const values = analytics.map((a) => a.value);
+    return {
+      max: Math.max(...values),
+      avg:
+        values.length > 0
+          ? values.reduce((s, v) => s + v, 0) / values.length
+          : 0,
+    };
+  }, [analytics]);
 
-  const analyticsMax = Math.max(...analytics.map((a) => a.value)); // O(n)
-  const analyticsAvg =
-    analytics.reduce((s, a) => s + a.value, 0) / analytics.length; // O(n)
+  // ✅ Pre-computed unread notifications for display
+  const unreadNotifications = useMemo(
+    () => notifications.filter((n) => !n.read),
+    [notifications],
+  );
 
   return (
     <div className="p-6">
@@ -58,10 +94,10 @@ export function Dashboard() {
         <div className="border rounded-lg p-4">
           <h3 className="font-semibold mb-2">AI Usage</h3>
           <p className="text-sm text-muted-foreground">
-            Max: {analyticsMax.toFixed(2)}
+            Max: {analyticsStats.max.toFixed(2)}
           </p>
           <p className="text-sm text-muted-foreground">
-            Avg: {analyticsAvg.toFixed(2)}
+            Avg: {analyticsStats.avg.toFixed(2)}
           </p>
         </div>
         <div className="border rounded-lg p-4 col-span-2">
@@ -69,7 +105,7 @@ export function Dashboard() {
             Notifications (showing first 50)
           </h3>
           <p className="text-sm text-muted-foreground mb-2">
-            Total Unread: {totalUnread}
+            Total Unread: {unreadCount}
           </p>
           <div className="max-h-40 overflow-y-auto text-xs space-y-1">
             {unreadNotifications.slice(0, 50).map((n) => (
@@ -93,26 +129,8 @@ export function Dashboard() {
             Count: {recentMessages.length}
           </p>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Interactive</CardTitle>
-            <CardDescription>
-              Click the button to test React DevTools state inspection.
-            </CardDescription>
-          </CardHeader>
-          <CardContentReactive />
-        </Card>
+        <InteractiveCard />
       </div>
     </div>
   );
 }
-
-const CardContentReactive = () => {
-  const [count, setCount] = useState(0);
-  return (
-    <CardContent>
-      <p className="text-2xl font-bold mb-3">{count}</p>
-      <Button onClick={() => setCount((c) => c + 1)}>Count</Button>
-    </CardContent>
-  );
-};
